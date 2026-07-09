@@ -1,0 +1,13 @@
+services:
+  ai-chat-widget-agent:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8005:8005"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
