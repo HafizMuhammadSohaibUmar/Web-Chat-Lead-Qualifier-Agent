@@ -9,6 +9,15 @@ from models.lead import Lead
 from models.session import ChatPhase, ChatSession, Message
 
 
+def _mask_contact(value: str | None) -> str:
+    if not value:
+        return ""
+    if "@" in value:
+        name, _, domain = value.partition("@")
+        return f"{name[:2]}***@{domain}" if domain else "***"
+    return f"{value[:3]}***{value[-4:]}" if len(value) >= 7 else "***"
+
+
 class SupabaseClient:
     def __init__(self) -> None:
         settings = get_settings()
@@ -125,6 +134,74 @@ class SupabaseClient:
             "leads_captured_7d": len(leads),
             "avg_messages_to_qualification": avg,
             "top_service_requests": sorted(services.items(), key=lambda item: item[1], reverse=True)[:5],
+        }
+
+    async def demo_snapshot(self, business_id: str) -> dict:
+        sessions = await self._request(
+            "GET",
+            "chat_sessions",
+            params={
+                "business_id": f"eq.{business_id}",
+                "select": "phase,lead_extracted,message_count,created_at,last_active_at",
+                "order": "last_active_at.desc",
+                "limit": "6",
+            },
+        )
+        leads = await self._request(
+            "GET",
+            "chat_leads",
+            params={
+                "business_id": f"eq.{business_id}",
+                "select": "phone,email,service_type,urgency,created_at",
+                "order": "created_at.desc",
+                "limit": "6",
+            },
+        )
+        chunks = await self._request(
+            "GET",
+            "knowledge_chunks",
+            params={
+                "business_id": f"eq.{business_id}",
+                "select": "chunk_type,created_at",
+                "order": "created_at.desc",
+                "limit": "6",
+            },
+        )
+        return {
+            "tables": {
+                "chat_sessions": {
+                    "sample": [
+                        {
+                            "phase": row.get("phase"),
+                            "lead_extracted": bool(row.get("lead_extracted")),
+                            "message_count": row.get("message_count"),
+                            "last_active_at": row.get("last_active_at"),
+                        }
+                        for row in sessions
+                    ],
+                },
+                "chat_leads": {
+                    "sample": [
+                        {
+                            "phone": _mask_contact(row.get("phone")),
+                            "email": _mask_contact(row.get("email")),
+                            "service_type": row.get("service_type"),
+                            "urgency": row.get("urgency"),
+                            "created_at": row.get("created_at"),
+                        }
+                        for row in leads
+                    ],
+                },
+                "knowledge_chunks": {
+                    "sample": [
+                        {
+                            "chunk_type": row.get("chunk_type"),
+                            "created_at": row.get("created_at"),
+                        }
+                        for row in chunks
+                    ],
+                },
+            }
         }
 
     async def health_check(self) -> dict:

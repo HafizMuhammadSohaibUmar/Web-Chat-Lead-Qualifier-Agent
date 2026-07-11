@@ -104,13 +104,35 @@ async def demo_page():
               <div class="step"><strong>2. Streaming</strong><code>/chat/stream</code> sends the answer through Server-Sent Events.</div>
               <div class="step"><strong>3. RAG</strong>The agent retrieves top knowledge chunks from Supabase pgvector.</div>
               <div class="step"><strong>4. Lead Capture</strong>When service, urgency, location, and contact fields are complete, a lead row is created.</div>
+              <h2>Safe Database Preview</h2>
+              <div class="callout">Masked Supabase snapshot. Session tokens, message bodies, names, addresses, and raw knowledge content are not exposed.</div>
+              <pre id="snapshot">Loading sanitized table preview...</pre>
             </section>
           </main>
+          <script>
+            async function refreshSnapshot() {
+              try {
+                const response = await fetch("/demo/snapshot");
+                document.getElementById("snapshot").textContent = JSON.stringify(await response.json(), null, 2);
+              } catch (error) {
+                document.getElementById("snapshot").textContent = "Snapshot unavailable.";
+              }
+            }
+            refreshSnapshot();
+            setInterval(refreshSnapshot, 15000);
+          </script>
           <script src="/static/widget.js" data-business-id="default-business" data-api-base="" data-variant="friendly" data-fallback-phone="+15551234567"></script>
         </body>
         </html>
         """
     )
+
+
+@app.get("/demo/snapshot")
+async def demo_snapshot():
+    if not get_settings().demo_mode_enabled:
+        return {"enabled": False}
+    return await supabase_client.demo_snapshot(get_settings().business_id)
 
 
 @app.post("/widget/init")
