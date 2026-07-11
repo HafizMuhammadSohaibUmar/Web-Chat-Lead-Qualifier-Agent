@@ -17,23 +17,46 @@ Embeddable AI chat widget for home service contractor websites. It answers busin
 - Owner SMS alert on qualified lead
 - Analytics endpoint
 
-## Related Agents
+## Architecture
 
-| Agent | Name |
-| --- | --- |
-| 1 | LeadPilot AI Voice Agent |
-| 2 | LeadPilot AI Missed Call Text-Back Agent |
-| 3 | LeadPilot AI Outbound Follow-Up Agent |
-| 4 | LeadPilot AI Review Request Agent |
-| 5 | LeadPilot AI Website Chat Widget Agent |
+```text
+Client Website
+  -> one-script widget.js embed
+  -> /widget/init JWT session
+  -> /chat/stream SSE response
+  -> prompt-injection and PII checks
+  -> RAG retrieval from Supabase pgvector
+  -> LiteLLM Gemini primary / Mistral fallback
+  -> lead extraction and phase tracking
+  -> Supabase chat_leads + owner SMS alert
+```
+
+## What It Proves
+
+- A contractor website can add AI lead qualification through one script tag.
+- Business-specific answers can come from a per-client RAG knowledge base instead of generic chatbot text.
+- Chat systems need CORS boundaries, session limits, IP limits, PII blocking, and prompt-injection tests.
+- The widget remains framework-free and deployable without a frontend build step.
+
+## Related AI Systems
+
+| System | Purpose | Links |
+| --- | --- | --- |
+| LeadPilot AI Voice Agent | Inbound phone agent for call qualification, emergency detection, and lead logging. | [Live](https://leadpilotai.sohaib.systems/) · [Repo](https://github.com/HafizMuhammadSohaibUmar/LeadPilotAI) |
+| Missed Call Text-Back AI Agent | SMS recovery and qualification after no-answer or busy calls. | [Live](https://missed-call-text-back-ai-agent.sohaib.systems/demo) · [Repo](https://github.com/HafizMuhammadSohaibUmar/Missed-Call-Text-Back-AI-Agent) |
+| Outbound Follow-Up AI Agent | Estimate, no-show, re-engagement, and seasonal follow-up campaigns. | [Live](https://outbound-followup-ai-agent.sohaib.systems/demo) · [Repo](https://github.com/HafizMuhammadSohaibUmar/Outbound-Follow-Up-AI-Agent) |
+| AI Auto Review Request Agent | Sentiment-aware post-job review and private feedback routing. | [Live](https://ai-review-agent.sohaib.systems/demo) · [Repo](https://github.com/HafizMuhammadSohaibUmar/AI-Auto-Review-Request-Agent) |
+| Web Chat Lead Qualifier Agent | Embeddable RAG chat widget for contractor websites. | [Live](https://web-chat-lead-qualifier-agent.sohaib.systems/demo) · [Repo](https://github.com/HafizMuhammadSohaibUmar/Web-Chat-Lead-Qualifier-Agent) |
+| Personal AI Agent | Local task, planning, and calendar assistant with LangGraph tools. | [Live](https://personal-ai-agent.sohaib.systems/) · [Repo](https://github.com/HafizMuhammadSohaibUmar/Personal-AI-Agent) |
+| Invoxia AI for ERPNext | Frappe/ERPNext assistant layer for navigation, voice input foundations, and live ERP answers. | [Live](https://invoxia.sohaib.systems/) · [Repo](https://github.com/HafizMuhammadSohaibUmar/InvoxiaAI-ERPNext) |
 
 ## Widget Embed
 
 ```html
 <script
-  src="https://ai-chat-widget-agent.sohaib.systems/static/widget.js"
+  src="https://web-chat-lead-qualifier-agent.sohaib.systems/static/widget.js"
   data-business-id="default-business"
-  data-api-base="https://ai-chat-widget-agent.sohaib.systems"
+  data-api-base="https://web-chat-lead-qualifier-agent.sohaib.systems"
   data-variant="friendly"
   data-fallback-phone="+15551234567">
 </script>

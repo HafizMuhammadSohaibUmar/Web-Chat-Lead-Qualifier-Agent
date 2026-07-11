@@ -60,10 +60,55 @@ async def demo_page():
         raise HTTPException(status_code=404, detail="Demo disabled")
     return HTMLResponse(
         """
-        <!doctype html><html><head><title>Chat Widget Demo</title></head>
-        <body><h1>Website Chat Widget Demo</h1>
-        <script src="/static/widget.js" data-business-id="default-business" data-api-base="" data-variant="friendly"></script>
-        </body></html>
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Web Chat Lead Qualifier Agent Demo</title>
+          <style>
+            :root { color-scheme: dark; --gold:#C49A1A; --teal:#4FB39F; --cream:#F5F0E4; --muted:#9A9080; --card:#18160E; --line:rgba(255,255,255,0.08); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+            * { box-sizing: border-box; }
+            body { margin:0; min-height:100vh; background:radial-gradient(circle at top left, rgba(47,143,126,0.16), transparent 34%), #0A0908; color:var(--cream); }
+            header { padding:42px clamp(20px,6vw,82px); border-bottom:1px solid var(--line); background:rgba(17,16,9,0.92); }
+            .badge { display:inline-flex; border:1px solid rgba(79,179,159,0.28); background:rgba(79,179,159,0.12); color:var(--teal); border-radius:999px; padding:7px 12px; font-weight:800; font-size:13px; }
+            h1 { margin:14px 0 10px; font-size:clamp(34px,5vw,62px); line-height:1; }
+            p { color:var(--muted); line-height:1.7; max-width:760px; font-size:18px; }
+            main { display:grid; grid-template-columns:1.05fr .95fr; gap:22px; padding:30px clamp(20px,6vw,82px) 80px; }
+            section { background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)), var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; }
+            h2 { margin:0 0 14px; }
+            .step { border-top:1px solid var(--line); padding:14px 0; color:var(--muted); }
+            .step strong { color:var(--cream); display:block; margin-bottom:4px; }
+            code { color:var(--teal); }
+            .callout { margin-top:16px; border:1px solid rgba(196,154,26,0.22); border-left:3px solid var(--gold); border-radius:10px; padding:14px; background:rgba(196,154,26,0.08); color:var(--muted); }
+            @media(max-width:900px){ main{grid-template-columns:1fr;} }
+          </style>
+        </head>
+        <body>
+          <header>
+            <span class="badge">Demo mode</span>
+            <h1>Web Chat Lead Qualifier Agent</h1>
+            <p>Use the chat bubble in the bottom-right corner. The widget initializes a session, streams the response, retrieves business knowledge, qualifies the lead, and stores the conversation state.</p>
+          </header>
+          <main>
+            <section>
+              <h2>Test Scenarios</h2>
+              <div class="step"><strong>Ask a knowledge question</strong>Try: <code>Do you handle emergency AC repair?</code></div>
+              <div class="step"><strong>Start a lead</strong>Try: <code>I need plumbing help at 123 Main Street today.</code></div>
+              <div class="step"><strong>Complete contact details</strong>Try: <code>My name is Jane Doe and my phone is 555-222-1000.</code></div>
+              <div class="callout">The public demo uses the real widget and API flow. Owner SMS can remain in dry-run mode depending on deployment settings.</div>
+            </section>
+            <section>
+              <h2>What Happens Internally</h2>
+              <div class="step"><strong>1. Session</strong><code>/widget/init</code> returns a JWT-backed session token.</div>
+              <div class="step"><strong>2. Streaming</strong><code>/chat/stream</code> sends the answer through Server-Sent Events.</div>
+              <div class="step"><strong>3. RAG</strong>The agent retrieves top knowledge chunks from Supabase pgvector.</div>
+              <div class="step"><strong>4. Lead Capture</strong>When service, urgency, location, and contact fields are complete, a lead row is created.</div>
+            </section>
+          </main>
+          <script src="/static/widget.js" data-business-id="default-business" data-api-base="" data-variant="friendly" data-fallback-phone="+15551234567"></script>
+        </body>
+        </html>
         """
     )
 
