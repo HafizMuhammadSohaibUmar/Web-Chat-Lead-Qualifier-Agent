@@ -46,7 +46,7 @@ Contractor Website
   -> optional Twilio owner alert
 ```
 
-## Engineering Signals
+## Engineering Points
 
 - The widget has no frontend framework and no build step.
 - CORS is configured from explicit origins rather than wildcard access.
@@ -133,10 +133,3 @@ uvicorn main:app --reload --port 8005
 ```
 
 Open `http://localhost:8005/demo`.
-
-## Configuration Notes
-
-- Set `ALLOWED_ORIGINS` to the exact domains allowed to embed the widget.
-- Set `JWT_SECRET` and `ADMIN_API_KEY` to long random values before exposing admin endpoints.
-- Keep `SMS_DRY_RUN=true` when evaluating the public demo without sending owner alerts.
-- Configure `GEMINI_API_KEY`, `MISTRAL_API_KEY`, Supabase credentials, and Twilio credentials according to the features being tested.
