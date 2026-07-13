@@ -66,10 +66,19 @@ async def demo_page():
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>Web Chat Lead Qualifier Agent Demo</title>
+          <link rel="icon" type="image/jpeg" href="/static/sohaib-profile.jpg">
           <style>
             :root { color-scheme: dark; --gold:#C49A1A; --teal:#4FB39F; --cream:#F5F0E4; --muted:#9A9080; --card:#18160E; --line:rgba(255,255,255,0.08); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
             * { box-sizing: border-box; }
             body { margin:0; min-height:100vh; background:radial-gradient(circle at top left, rgba(47,143,126,0.16), transparent 34%), #0A0908; color:var(--cream); }
+            .site-header { position: sticky; top: 0; z-index: 10; min-height: 72px; padding: 0 clamp(20px,6vw,82px); display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); background: rgba(10,9,8,0.92); backdrop-filter: blur(12px); }
+            .brand { display: flex; align-items: center; gap: 12px; color: var(--cream); text-decoration: none; min-width: 0; }
+            .brand img { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); }
+            .brand strong { display: block; font-size: 15px; }
+            .brand span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+            .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+            .nav-actions a { min-height: 38px; display: inline-flex; align-items: center; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: #111009; color: var(--cream); text-decoration: none; font-size: 13px; font-weight: 700; }
+            .nav-actions a.primary { background: var(--gold); border-color: var(--gold); color: #0A0908; }
             header { padding:42px clamp(20px,6vw,82px); border-bottom:1px solid var(--line); background:rgba(17,16,9,0.92); }
             .badge { display:inline-flex; border:1px solid rgba(79,179,159,0.28); background:rgba(79,179,159,0.12); color:var(--teal); border-radius:999px; padding:7px 12px; font-weight:800; font-size:13px; }
             h1 { margin:14px 0 10px; font-size:clamp(34px,5vw,62px); line-height:1; }
@@ -102,11 +111,23 @@ async def demo_page():
             .footer-bottom{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
             .footer-bottom-links{display:flex;gap:12px;flex-wrap:wrap}
             .footer-bottom a{color:var(--cream);text-decoration:none}
+            .snapshot-section{grid-column:1 / -1}
             @media(max-width:900px){ main{grid-template-columns:1fr;} }
             @media(max-width:680px){ .metrics,.footer-top{grid-template-columns:1fr;} }
           </style>
         </head>
         <body>
+          <div class="site-header">
+            <a class="brand" href="https://sohaib.systems/" target="_blank" rel="noreferrer">
+              <img src="/static/sohaib-profile.jpg" alt="Sohaib Systems">
+              <span><strong>Web Chat Lead Qualifier Agent</strong><span>sohaib.systems</span></span>
+            </a>
+            <div class="nav-actions">
+              <a href="https://github.com/HafizMuhammadSohaibUmar/Web-Chat-Lead-Qualifier-Agent" target="_blank" rel="noreferrer">GitHub</a>
+              <a href="/health" target="_blank" rel="noreferrer">Health</a>
+              <a class="primary" href="https://sohaib.systems/portfolio.html" target="_blank" rel="noreferrer">All Projects</a>
+            </div>
+          </div>
           <header>
             <span class="badge">Demo mode</span>
             <h1>Web Chat Lead Qualifier Agent</h1>
@@ -131,6 +152,8 @@ async def demo_page():
               <div class="step"><strong>2. Streaming</strong><code>/chat/stream</code> sends the answer through Server-Sent Events.</div>
               <div class="step"><strong>3. RAG</strong>The agent retrieves top knowledge chunks from Supabase pgvector.</div>
               <div class="step"><strong>4. Lead Capture</strong>When service, urgency, location, and contact fields are complete, a lead row is created.</div>
+            </section>
+            <section class="snapshot-section">
               <h2>Safe Database Preview</h2>
               <div class="callout">Masked Supabase snapshot. Session tokens, message bodies, names, addresses, and raw knowledge content are not exposed.</div>
               <div id="snapshot" class="snapshot">Loading sanitized table preview...</div>
