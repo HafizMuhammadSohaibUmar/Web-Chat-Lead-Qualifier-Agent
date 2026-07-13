@@ -81,14 +81,30 @@ async def demo_page():
             .step strong { color:var(--cream); display:block; margin-bottom:4px; }
             code { color:var(--teal); }
             .callout { margin-top:16px; border:1px solid rgba(196,154,26,0.22); border-left:3px solid var(--gold); border-radius:10px; padding:14px; background:rgba(196,154,26,0.08); color:var(--muted); }
+            .metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:18px; }
+            .metric { border:1px solid var(--line); border-radius:12px; padding:14px; background:#111009; }
+            .metric strong { display:block; color:var(--cream); font-size:14px; margin-bottom:5px; }
+            .metric span { color:var(--muted); font-size:13px; line-height:1.5; }
+            .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:12px; margin-top:12px; background:#111009; }
+            table { width:100%; border-collapse:collapse; min-width:520px; }
+            th, td { text-align:left; border-bottom:1px solid var(--line); padding:10px 12px; font-size:14px; vertical-align:top; }
+            th { color:var(--cream); background:rgba(255,255,255,0.04); }
+            td { color:var(--muted); }
+            .empty { color:var(--muted); border:1px dashed var(--line); border-radius:12px; padding:14px; margin-top:10px; }
             @media(max-width:900px){ main{grid-template-columns:1fr;} }
+            @media(max-width:680px){ .metrics{grid-template-columns:1fr;} }
           </style>
         </head>
         <body>
           <header>
             <span class="badge">Demo mode</span>
             <h1>Web Chat Lead Qualifier Agent</h1>
-            <p>Use the chat bubble in the bottom-right corner. The widget initializes a session, streams the response, retrieves business knowledge, qualifies the lead, and stores the conversation state.</p>
+            <p>An embeddable website chat agent for home-service contractors. It answers service questions from a business knowledge base, collects the details needed for a quote or dispatch, stores the conversation state, and creates a lead when the request is complete.</p>
+            <div class="metrics">
+              <div class="metric"><strong>Problem solved</strong><span>Website visitors often leave before calling. The widget turns service questions into structured lead intake.</span></div>
+              <div class="metric"><strong>How to evaluate</strong><span>Open the chat bubble, ask a knowledge question, then provide service, address, urgency, name, and contact details.</span></div>
+              <div class="metric"><strong>What to watch</strong><span>The agent should stream a reply, ask only for missing fields, and update the safe table preview without exposing private text.</span></div>
+            </div>
           </header>
           <main>
             <section>
@@ -96,7 +112,7 @@ async def demo_page():
               <div class="step"><strong>Ask a knowledge question</strong>Try: <code>Do you handle emergency AC repair?</code></div>
               <div class="step"><strong>Start a lead</strong>Try: <code>I need plumbing help at 123 Main Street today.</code></div>
               <div class="step"><strong>Complete contact details</strong>Try: <code>My name is Jane Doe and my phone is 555-222-1000.</code></div>
-              <div class="callout">The public demo uses the real widget and API flow. Owner SMS can remain in dry-run mode depending on deployment settings.</div>
+              <div class="callout">This page uses the same one-script widget that a contractor site would embed. Owner SMS alerts may be kept in dry-run mode for safe public testing.</div>
             </section>
             <section>
               <h2>What Happens Internally</h2>
@@ -106,17 +122,37 @@ async def demo_page():
               <div class="step"><strong>4. Lead Capture</strong>When service, urgency, location, and contact fields are complete, a lead row is created.</div>
               <h2>Safe Database Preview</h2>
               <div class="callout">Masked Supabase snapshot. Session tokens, message bodies, names, addresses, and raw knowledge content are not exposed.</div>
-              <pre id="snapshot">Loading sanitized table preview...</pre>
+              <div id="snapshot" class="snapshot">Loading sanitized table preview...</div>
             </section>
           </main>
           <script>
             async function refreshSnapshot() {
               try {
                 const response = await fetch("/demo/snapshot");
-                document.getElementById("snapshot").textContent = JSON.stringify(await response.json(), null, 2);
+                renderSnapshot(await response.json());
               } catch (error) {
                 document.getElementById("snapshot").textContent = "Snapshot unavailable.";
               }
+            }
+            function renderSnapshot(data) {
+              const root = document.getElementById("snapshot");
+              const tables = data.tables || {};
+              root.innerHTML = Object.entries(tables).map(([name, table]) => {
+                const rows = table.sample || [];
+                if (!rows.length) return `<h3>${title(name)}</h3><div class="empty">No recent demo-safe rows yet.</div>`;
+                const cols = Object.keys(rows[0]);
+                return `<h3>${title(name)}</h3><div class="table-wrap"><table><thead><tr>${cols.map(c => `<th>${title(c)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${cols.map(c => `<td>${escapeHtml(String(row[c] ?? ""))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+              }).join("");
+            }
+            function title(value) { return value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase()); }
+            function escapeHtml(value) {
+              return value.replace(/[&<>"']/g, (ch) => {
+                if (ch === "&") return "&amp;";
+                if (ch === "<") return "&lt;";
+                if (ch === ">") return "&gt;";
+                if (ch === '"') return "&quot;";
+                return "&#39;";
+              });
             }
             refreshSnapshot();
             setInterval(refreshSnapshot, 15000);
