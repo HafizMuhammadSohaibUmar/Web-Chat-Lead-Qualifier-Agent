@@ -5,6 +5,7 @@ Embeddable AI chat widget for home-service contractor websites. The agent answer
 ## Live Demo
 
 - Live demo: `https://web-chat-lead-qualifier-agent.sohaib.systems/demo`
+- Health check: `https://web-chat-lead-qualifier-agent.sohaib.systems/health`
 - Repository: `https://github.com/HafizMuhammadSohaibUmar/Web-Chat-Lead-Qualifier-Agent`
 
 How to evaluate the demo:
@@ -14,6 +15,18 @@ How to evaluate the demo:
 3. Start a lead request, for example: `I need plumbing help at 123 Main Street today.`
 4. Add contact details, for example: `My name is Jane Doe and my phone is 555-222-1000.`
 5. Watch the safe database preview update with masked session/lead activity. It intentionally hides message bodies, names, addresses, session tokens, and raw knowledge content.
+
+## Related AI Systems
+
+| System | Purpose | Live Demo | Repository |
+| --- | --- | --- | --- |
+| LeadPilot AI Voice Agent | Inbound phone agent for call qualification, emergency detection, and lead logging. | [Live Demo](https://leadpilotai.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/LeadPilotAI) |
+| Missed Call Text-Back AI Agent | SMS recovery and qualification after no-answer or busy calls. | [Live Demo](https://missed-call-text-back-ai-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Missed-Call-Text-Back-AI-Agent) |
+| Outbound Follow-Up AI Agent | Estimate, no-show, re-engagement, and seasonal follow-up campaigns. | [Live Demo](https://outbound-followup-ai-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Outbound-Follow-Up-AI-Agent) |
+| AI Auto Review Request Agent | Sentiment-aware post-job review and private feedback routing. | [Live Demo](https://ai-review-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/AI-Auto-Review-Request-Agent) |
+| Web Chat Lead Qualifier Agent | Embeddable RAG chat widget for contractor websites. | [Live Demo](https://web-chat-lead-qualifier-agent.sohaib.systems/demo) | **This repo** |
+| Personal AI Agent | Self-hosted task, planning, and local-calendar assistant with LangGraph tools. | [Live Demo](https://personal-ai-agent.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Personal-AI-Agent) |
+| Invoxia AI for ERPNext | Frappe/ERPNext assistant layer for navigation, voice input foundations, and live ERP answers. | [Live Demo](https://invoxia.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/InvoxiaAI-ERPNext) |
 
 ## What It Does
 
@@ -46,6 +59,16 @@ Contractor Website
   -> optional Twilio owner alert
 ```
 
+## Conversation Flow
+
+1. The widget initializes a JWT-backed session.
+2. The visitor asks a service or availability question.
+3. The backend retrieves relevant knowledge chunks for that business.
+4. The assistant answers and identifies missing qualification fields.
+5. The conversation moves through discovery, qualification, contact, and confirmation.
+6. Once service, location, urgency, and contact details are complete, a lead is created.
+7. The owner can be alerted by SMS when Twilio credentials are configured.
+
 ## Engineering Points
 
 - The widget has no frontend framework and no build step.
@@ -54,18 +77,6 @@ Contractor Website
 - Knowledge retrieval is per business, not a global shared prompt.
 - Sensitive demo data is masked before being displayed on the public page.
 - The chat endpoint can fall back gracefully when the model or API is unavailable.
-
-## Related AI Systems
-
-| System | Purpose | Live Demo | Repository |
-| --- | --- | --- | --- |
-| LeadPilot AI Voice Agent | Inbound phone agent for call qualification, emergency detection, and lead logging. | [Live Demo](https://leadpilotai.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/LeadPilotAI) |
-| Missed Call Text-Back AI Agent | SMS recovery and qualification after no-answer or busy calls. | [Live Demo](https://missed-call-text-back-ai-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Missed-Call-Text-Back-AI-Agent) |
-| Outbound Follow-Up AI Agent | Estimate, no-show, re-engagement, and seasonal follow-up campaigns. | [Live Demo](https://outbound-followup-ai-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Outbound-Follow-Up-AI-Agent) |
-| AI Auto Review Request Agent | Sentiment-aware post-job review and private feedback routing. | [Live Demo](https://ai-review-agent.sohaib.systems/demo) | [Repository](https://github.com/HafizMuhammadSohaibUmar/AI-Auto-Review-Request-Agent) |
-| Web Chat Lead Qualifier Agent | Embeddable RAG chat widget for contractor websites. | [Live Demo](https://web-chat-lead-qualifier-agent.sohaib.systems/demo) | **This repo** |
-| Personal AI Agent | Self-hosted task, planning, and local-calendar assistant with LangGraph tools. | [Live Demo](https://personal-ai-agent.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/Personal-AI-Agent) |
-| Invoxia AI for ERPNext | Frappe/ERPNext assistant layer for navigation, voice input foundations, and live ERP answers. | [Live Demo](https://invoxia.sohaib.systems/) | [Repository](https://github.com/HafizMuhammadSohaibUmar/InvoxiaAI-ERPNext) |
 
 ## Widget Embed
 
@@ -95,6 +106,35 @@ Contractor Website
 | `GET` | `/health` | Health check |
 
 Admin endpoints require `X-LeadPilot-Key`.
+
+## Tech Stack
+
+- FastAPI and Uvicorn
+- Server-Sent Events for streaming responses
+- Vanilla JavaScript widget
+- LangChain conversation chain
+- LiteLLM with Gemini primary and Mistral fallback
+- Supabase PostgREST
+- Supabase pgvector
+- Local `sentence-transformers/all-MiniLM-L6-v2` embeddings
+- python-jose JWT sessions
+- Twilio SMS owner alerts
+- Pytest
+- Docker and Docker Compose
+
+## Production Features
+
+- Exact-origin CORS configuration
+- JWT session tokens with expiry
+- Per-session message limits
+- Per-IP rate limits
+- Per-business daily session limits
+- Prompt-injection detection and refusal behavior
+- Credit-card and SSN pattern blocking
+- Per-business RAG knowledge retrieval
+- Sanitized public demo preview
+- Graceful widget fallback when the API is unavailable
+- A/B greeting support through `data-variant`
 
 ## Supabase Schema
 
@@ -133,3 +173,30 @@ uvicorn main:app --reload --port 8005
 ```
 
 Open `http://localhost:8005/demo`.
+
+## Tests
+
+```bash
+pytest tests/ -v
+```
+
+The tests cover:
+
+- RAG retrieval behavior
+- qualification flow behavior
+- prompt-injection refusal
+- API/session behavior
+
+## Deployment
+
+```bash
+docker compose up --build -d
+```
+
+Set `ALLOWED_ORIGINS` to the exact domains allowed to embed the widget. Do not use wildcard CORS for a public widget API.
+
+## Current Demo Limitations
+
+- The demo knowledge base is sample business knowledge unless a real business profile is onboarded.
+- Owner SMS alerts depend on Twilio credentials and `SMS_DRY_RUN`.
+- Lead quality depends on the completeness of the onboarded services, service area, FAQ, and business-hours data.

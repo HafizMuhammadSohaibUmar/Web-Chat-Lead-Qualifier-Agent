@@ -86,13 +86,24 @@ async def demo_page():
             .metric strong { display:block; color:var(--cream); font-size:14px; margin-bottom:5px; }
             .metric span { color:var(--muted); font-size:13px; line-height:1.5; }
             .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:12px; margin-top:12px; background:#111009; }
-            table { width:100%; border-collapse:collapse; min-width:520px; }
-            th, td { text-align:left; border-bottom:1px solid var(--line); padding:10px 12px; font-size:14px; vertical-align:top; }
+            table { width:100%; border-collapse:collapse; min-width:620px; table-layout:fixed; }
+            th, td { text-align:left; border-bottom:1px solid var(--line); padding:10px 12px; font-size:14px; vertical-align:top; word-break:break-word; }
             th { color:var(--cream); background:rgba(255,255,255,0.04); }
             td { color:var(--muted); }
             .empty { color:var(--muted); border:1px dashed var(--line); border-radius:12px; padding:14px; margin-top:10px; }
+            footer{border-top:1px solid var(--line);padding:24px clamp(20px,6vw,82px);color:var(--muted);background:#0A0908}
+            .footer-top{display:grid;grid-template-columns:minmax(0,1.4fr) 1fr 1fr;gap:18px;max-width:1180px;margin:0 auto 18px}
+            .footer-brand a{color:var(--cream);font-size:24px;font-weight:900;text-decoration:none}
+            .footer-brand span{color:var(--gold)}
+            .footer-brand p,.footer-col a,.footer-bottom{color:var(--muted);font-size:14px}
+            .footer-col h4{margin:0 0 8px;color:var(--cream)}
+            .footer-links-list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+            .footer-links-list a{text-decoration:none}
+            .footer-bottom{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+            .footer-bottom-links{display:flex;gap:12px;flex-wrap:wrap}
+            .footer-bottom a{color:var(--cream);text-decoration:none}
             @media(max-width:900px){ main{grid-template-columns:1fr;} }
-            @media(max-width:680px){ .metrics{grid-template-columns:1fr;} }
+            @media(max-width:680px){ .metrics,.footer-top{grid-template-columns:1fr;} }
           </style>
         </head>
         <body>
@@ -112,7 +123,7 @@ async def demo_page():
               <div class="step"><strong>Ask a knowledge question</strong>Try: <code>Do you handle emergency AC repair?</code></div>
               <div class="step"><strong>Start a lead</strong>Try: <code>I need plumbing help at 123 Main Street today.</code></div>
               <div class="step"><strong>Complete contact details</strong>Try: <code>My name is Jane Doe and my phone is 555-222-1000.</code></div>
-              <div class="callout">This page uses the same one-script widget that a contractor site would embed. Owner SMS alerts may be kept in dry-run mode for safe public testing.</div>
+              <div class="callout">This page uses the same one-script widget that a contractor site would embed. The chat path can be evaluated publicly while owner SMS alerts remain controlled by deployment settings.</div>
             </section>
             <section>
               <h2>What Happens Internally</h2>
@@ -125,6 +136,32 @@ async def demo_page():
               <div id="snapshot" class="snapshot">Loading sanitized table preview...</div>
             </section>
           </main>
+          <footer>
+            <div class="footer-top">
+              <div class="footer-brand">
+                <a href="https://sohaib.systems/" target="_blank" rel="noreferrer">Sohaib<span>.</span></a>
+                <p>AI Solutions Engineer building practical automation systems for home-service lead capture, follow-up, and customer communication.</p>
+              </div>
+              <div class="footer-col">
+                <h4>Project</h4>
+                <ul class="footer-links-list">
+                  <li><a href="https://github.com/HafizMuhammadSohaibUmar/Web-Chat-Lead-Qualifier-Agent" target="_blank" rel="noreferrer">GitHub Repository</a></li>
+                  <li><a href="/health" target="_blank" rel="noreferrer">Health Check</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h4>Connect</h4>
+                <ul class="footer-links-list">
+                  <li><a href="https://sohaib.systems/portfolio.html" target="_blank" rel="noreferrer">Project Portfolio</a></li>
+                  <li><a href="mailto:hafizmuhammadsohaibumar@gmail.com">Email</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="footer-bottom">
+              <span>2026 Hafiz Muhammad Sohaib Umar</span>
+              <div class="footer-bottom-links"><a href="https://sohaib.systems/" target="_blank" rel="noreferrer">sohaib.systems</a><a href="https://github.com/HafizMuhammadSohaibUmar" target="_blank" rel="noreferrer">GitHub</a></div>
+            </div>
+          </footer>
           <script>
             async function refreshSnapshot() {
               try {
@@ -157,10 +194,12 @@ async def demo_page():
             refreshSnapshot();
             setInterval(refreshSnapshot, 15000);
           </script>
-          <script src="/static/widget.js" data-business-id="default-business" data-api-base="" data-variant="friendly" data-fallback-phone="+15551234567"></script>
+          <script src="/static/widget.js" data-business-id="{{BUSINESS_ID}}" data-api-base="" data-variant="friendly" data-fallback-phone="{{BUSINESS_PHONE}}"></script>
         </body>
         </html>
         """
+        .replace("{{BUSINESS_ID}}", get_settings().business_id)
+        .replace("{{BUSINESS_PHONE}}", get_settings().business_phone)
     )
 
 
@@ -174,7 +213,10 @@ async def demo_snapshot():
 @app.post("/widget/init")
 async def init_widget(request: Request):
     enforce_ip_rate_limit(request)
-    payload = await request.json()
+    try:
+        payload = await request.json()
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload.") from exc
     business_id = payload.get("business_id") or get_settings().business_id
     if await supabase_client.sessions_created_today(business_id) >= get_settings().max_sessions_per_business_day:
         raise HTTPException(status_code=429, detail="Daily session limit reached.")
